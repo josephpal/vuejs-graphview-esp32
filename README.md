@@ -1,24 +1,17 @@
-# vuejs-graphview-esp32
+<p align="center"><img width="25%" src="logo.png"></p>
 
-## Project setup
-```
-npm install
-```
+# GraphView
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+GraphView is a simple example to plot and receive data via a websocket connection with a ESP32 micro-controller.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Demo
 
-### Lints and fixes files
-```
-npm run lint
-```
+...
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Quick start
+
+...
+
+## Environment Setup
+
+...
