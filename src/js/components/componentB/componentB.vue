@@ -1,6 +1,6 @@
 <template>
   <div class="componentB">
-    <div class="content">Component B!</div>
+    <div class="content" @click="clicked">Component B</div>
   </div>
 </template>
 
@@ -28,7 +28,9 @@
     },
 
     methods: {
-
+        clicked() {
+          console.log("componentB clicked!");
+        }
     },
 
     components: {
@@ -38,20 +40,32 @@
 </script>
 
 <style lang="scss">
-    @import '../../../scss/variables/colors';
+  @import '../../../scss/variables/colors';
 
-   .componentB {
-        width: 40%;
-        height: calc(100vh - #{$headerHeight});
+  .componentB {
+    width: 40%;
+    height: calc(100vh - #{$headerHeight});
 
-        background-color: #E3F2FD;
-        padding: 15px;
-        padding-left: 0px;
+    background-color: #E3F2FD;
+    padding: 15px;
+    padding-left: 0px;
 
-        .content {
-            //background-color: #BBDEFB;
-            color: #263238;
-            height: 100%;
-        }
+    .content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 2px 2px 4px $colorDarkGrey;
+
+      color: #263238;
+      height: 100%;
+
+      cursor: pointer;
+      transition: background-color .3s;
+
+      &:hover {
+        background-color: #BBDEFB;
+      }
     }
+  }
 </style>
