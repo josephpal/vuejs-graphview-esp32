@@ -1,3 +1,5 @@
+/* https://material.io/design/color/#tools-for-picking-colors */
+
 <template>
   <div id="app">
     <Header />
