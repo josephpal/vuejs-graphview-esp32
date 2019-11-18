@@ -1,0 +1,21 @@
+@import './variables/colors';
+
+html {
+  min-width: 900px;
+  margin: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+
+  font-family: 'Roboto';
+  font-size: 16px;
+
+  background-color: $colorDarkestBlue;
+  color: $colorWhite;
+}
+
+* {
+  box-sizing: border-box;
+}
