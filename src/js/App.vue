@@ -4,14 +4,14 @@
   <div id="app">
     <Header />
     <main>
-        <ComponentA />
+        <GraphContainer />
         <ComponentB />
     </main>
   </div>
 </template>
 
 <script>
-import ComponentA from './components/componentA/componentA';
+import GraphContainer from './components/GraphComponent/GraphContainer';
 import Header from './components/Header';
 import ComponentB from './components/componentB/componentB';
 
@@ -24,7 +24,7 @@ export default {
 
   components: {
      Header,
-     ComponentA,
+     GraphContainer,
      ComponentB
   }
 };

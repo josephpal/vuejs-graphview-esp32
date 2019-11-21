@@ -1,6 +1,6 @@
 <template>
   <div class="componentB">
-    <div class="content" @click="clicked">Component B</div>
+    <div class="content" @click="clicked"></div>
   </div>
 </template>
 
@@ -54,7 +54,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
       box-shadow: 2px 2px 4px $colorDarkGrey;
 
       color: #263238;
