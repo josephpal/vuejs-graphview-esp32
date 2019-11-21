@@ -6,6 +6,8 @@ GraphView is a simple example to plot and receive data via a websocket connectio
 
 ## Demo
 
+<p align="center"><img width="95%" src="demo.jpg"></p>
+
 ...
 
 ## Quick start
