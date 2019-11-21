@@ -2,7 +2,7 @@
 
 # GraphView
 
-GraphView is a simple example to plot and receive data via a websocket connection with a ESP32 microcontroller.
+GraphView is a simple example to plot and receive data via a websocket connection from a ESP32 microcontroller running a c++ backend.
 
 ## Demo
 
