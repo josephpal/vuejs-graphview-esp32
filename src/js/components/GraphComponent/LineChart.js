@@ -46,7 +46,7 @@ export default {
           display: true
         },
         responsive: true,
-        maintainAspectRatio: true
+        maintainAspectRatio: false
       }
     };
   },
