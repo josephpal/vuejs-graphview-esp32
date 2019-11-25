@@ -5,7 +5,7 @@
     <Header />
     <main>
         <GraphContainer />
-        <ComponentB />
+        <MandelbrotViewer />
     </main>
   </div>
 </template>
@@ -13,7 +13,7 @@
 <script>
 import GraphContainer from './components/GraphComponent/GraphContainer';
 import Header from './components/Header';
-import ComponentB from './components/componentB/componentB';
+import MandelbrotViewer from './components/MandelbrotComponent/MandelbrotViewer';
 
 export default {
   name: 'app',
@@ -25,7 +25,7 @@ export default {
   components: {
      Header,
      GraphContainer,
-     ComponentB
+     MandelbrotViewer
   }
 };
 </script>

@@ -96,7 +96,7 @@
       width: 60px;
       height: 60px;
 
-      @media (max-width: 1700px) {
+      @media (max-width: 1800px) {
         width: 50px;
         height: 50px;
       }
@@ -108,7 +108,7 @@
       height: 80%;
       max-height: 20px;
 
-      @media (max-width: 1700px) {
+      @media (max-width: 1800px) {
         width: auto;
         height: 35%;
       }
