@@ -1,4 +1,5 @@
 /* usefull web pages: */
+/* https://konvajs.org/docs/shapes/Rect.html */
 /* https://stackoverflow.com/questions/4899799/whats-the-best-way-to-set-a-single-pixel-in-an-html5-canvas */
 /* https://pastebin.com/4ijVKJcC */
 /* https://compile.fi/canvas-filled-three-ways-js-webassembly-and-webgl/ */
@@ -9,6 +10,8 @@
 /* https://en.wikipedia.org/wiki/Netpbm_format */
 /* https://codingexplained.com/coding/front-end/vue-js/working-with-methods-in-vue-js */
 /* https://medium.com/javascript-in-plain-english/avoid-mutating-a-prop-directly-7b127b9bca5b */
+/* https://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing */
+/* https://dev.to/alexmourer/sharing-data-between-components-invuejs-48me */
 
 <template>
     <div class="mandelbrot-viewer">

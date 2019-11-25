@@ -88,9 +88,9 @@
     mounted() {
       this.fillData();
 
-      /* this.interval = setInterval(() => {
+      this.interval = setInterval(() => {
           this.addData();
-      }, 500); */
+      }, 500);
     },
 
     methods: {
