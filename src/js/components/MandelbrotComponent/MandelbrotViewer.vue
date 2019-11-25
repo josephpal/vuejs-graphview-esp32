@@ -8,6 +8,7 @@
 /* https://github.com/mikolalysenko/ppm */
 /* https://en.wikipedia.org/wiki/Netpbm_format */
 /* https://codingexplained.com/coding/front-end/vue-js/working-with-methods-in-vue-js */
+/* https://medium.com/javascript-in-plain-english/avoid-mutating-a-prop-directly-7b127b9bca5b */
 
 <template>
     <div class="mandelbrot-viewer">
@@ -34,21 +35,30 @@
           height: 600
         },
 
-        convertedImage: null
+        convertedImage: null,
       };
     },
 
     props: {
-
+      ppmImageData: {
+        type: String
+      }
     },
 
     mounted() {
-      // this.drawImage();
-      // this.drawCircle();
 
-      this.interval = setTimeout(() => {
-          this.drawPixel();
-      }, 2000);
+    },
+
+    watch: {
+      ppmImageData: function() {
+          if (this.ppmImageData !== "") {
+              console.log("receiving ppm image data in viewer component.");
+              this.clearCanvas();
+              this.drawPPMImage(this.ppmImageData);
+          } else {
+
+          }
+      }
     },
 
     computed: {
@@ -127,8 +137,8 @@
 
       },
 
-      drawPixel() {
-        console.log("drawing pixel ...");
+      drawPPMImage(ppmImage) {
+        console.log("drawing ppm pixel image...");
 
         // first we need to create a stage
         var stage = new Konva.Stage({
@@ -144,7 +154,7 @@
         stage.add(layer);
 
         // get canvas context from konva layer
-        var c = layer.getCanvas()._canvas;;
+        var c = layer.getCanvas()._canvas;
         var ctx = c.getContext('2d');
 
         // generate and 1x1 image data object (pixel), which will be drawn directly on canvas using
@@ -159,7 +169,7 @@
         const data = new Readable();
 
         // data string (mandelbrot image as ppm file)
-        data.push(mandelbrot);
+        data.push(ppmImage);
         data.push(null);
 
         // parse ppm file to array
@@ -182,9 +192,36 @@
               }
             }
 
+            // drawing the pixel matrix is done
             console.log("drawing pixel matrix done.");
+
+            // clear prop data cache
+            this.$emit("clearData", "");
         }.bind(this));
       },
+
+      clearCanvas() {
+          console.log("clearing canvas.");
+
+          // first we need to create a stage
+          var stage = new Konva.Stage({
+            container: 'container',   // id of container <div>
+            width: this.configKonva.width,
+            height: this.configKonva.height
+          });
+
+          // then create layer
+          var layer = new Konva.Layer();
+
+          // add the layer to the stage
+          stage.add(layer);
+
+          // get canvas context from konva layer
+          var c = layer.getCanvas()._canvas;
+          var ctx = c.getContext('2d');
+
+          ctx.clearRect(0, 0, this.configKonva.width, this.configKonva.height);
+      }
     },
 
     components: {

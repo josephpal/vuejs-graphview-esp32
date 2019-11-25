@@ -4,8 +4,8 @@
   <div id="app">
     <Header />
     <main>
-        <GraphContainer />
-        <MandelbrotViewer />
+        <GraphContainer @data="updatePPMData" />
+        <MandelbrotViewer :ppmImageData="ppmData" @clearData="updatePPMData" />
     </main>
   </div>
 </template>
@@ -18,14 +18,22 @@ import MandelbrotViewer from './components/MandelbrotComponent/MandelbrotViewer'
 export default {
   name: 'app',
 
-  data() { return {  }; },
+  data: function() {
+    return {
+      ppmData: ""
+    };
+  },
 
-  methods: {},
+  methods: {
+      updatePPMData(variable) {
+          this.ppmData = variable;
+      },
+  },
 
   components: {
-     Header,
-     GraphContainer,
-     MandelbrotViewer
+      Header,
+      GraphContainer,
+      MandelbrotViewer
   }
 };
 </script>

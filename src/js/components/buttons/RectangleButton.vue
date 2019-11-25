@@ -1,3 +1,5 @@
+/* https://material.io/resources/icons */
+
 <template>
   <button class="round-button" :class="[!enabled ? 'disabled' : '', size]" @click="onClicked">
     <Spinner v-if="showSpinner"/>

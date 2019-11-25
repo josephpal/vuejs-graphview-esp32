@@ -11,7 +11,7 @@
                   <RectangleButton  class=""
                                     icon="load"
                                     :enabled="true"
-                                    @click=""
+                                    @click="emitPPMData"
                                     :showSpinner="false" />
                   <RectangleButton  class=""
                                     icon="arrow"
@@ -56,11 +56,15 @@
   import LineChart from './LineChart.js'
   import RectangleButton from '../buttons/RectangleButton'
 
+  /* as an example of emitting the received ppm file */
+  import { mandelbrot } from '../../utils/MandelbrotExample';
+
   export default {
     name: 'GraphContainer',
 
     data() {
       return {
+        /* graph properties */
         labelArray: [0],
 
         dataArray1: [0],
@@ -74,7 +78,10 @@
         datacollection4: null,
 
         index: 0,
-        interval: null
+        interval: null,
+
+        /* values */
+        ppmImageData: "",
       };
     },
 
@@ -107,6 +114,7 @@
 
         this.fillData();
       },
+
       fillData() {
         this.datacollection1 = {
           labels: this.labelArray,
@@ -151,6 +159,15 @@
             }
           ]
         };
+      },
+
+      emitPPMData() {
+        console.log("emit ppm data from graph container.");
+
+        this.ppmImageData = mandelbrot;
+        this.$emit("data", this.ppmImageData);
+
+        this.ppmImageData = "";
       }
     },
 
