@@ -70,16 +70,16 @@
     color: #fff;
     cursor: pointer;
     box-shadow: 2px 2px 4px $colorDarkGrey;
-    background-color: rgba($colorThemeBlue, .9);
+    background-color: rgba($colorThemeBlue7, .9);
     transition: background-color .3s;
 
     &:hover {
       border: 0;
-      background-color: $colorThemeBlue;
+      background-color: $colorThemeBlue7;
     }
 
     &.disabled {
-      background-color: rgba($colorMediumGrey, .4);
+      background-color: rgba($colorThemeBlue2, .6);
       color: hsla(0, 0, 0, .4);
       cursor: default;
     }
