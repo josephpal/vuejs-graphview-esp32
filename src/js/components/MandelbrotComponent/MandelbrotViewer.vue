@@ -27,6 +27,7 @@
   import mandelbrotImg from '../../../assets/pic/mandelbrot.jpeg';
   import { mandelbrot } from '../../utils/MandelbrotExample';
 
+  import { dec2Binary, gd } from '../../utils/helperFunctions'
 
   export default {
     name: 'MandelbrotViewer',
@@ -56,8 +57,15 @@
       ppmImageData: function() {
           if (this.ppmImageData !== "") {
               console.log("receiving ppm image data in viewer component.");
+
+              /* clearing canvas */
               this.clearCanvas();
-              this.drawPPMImage(this.ppmImageData);
+
+              /* decompress image */
+              this.decompressImage(this.ppmImageData);
+
+              /* draw decompressed pixel *.ppm image */
+              this.drawPPMImage(this.convertedImage, true);
           } else {
 
           }
@@ -140,7 +148,7 @@
 
       },
 
-      drawPPMImage(ppmImage) {
+      drawPPMImage(ppmImage, rotate) {
         console.log("drawing ppm pixel image...");
 
         // first we need to create a stage
@@ -178,20 +186,21 @@
         // parse ppm file to array
         ppm.parse(data, function (err, ppmArray) {
             console.log("parsing ppm file done.");
+            console.log(ppmArray);
 
             // loop through the pixels
             for (var j = 0; j < this.configKonva.height; j+=1) {
               for (var i = 0; i < this.configKonva.width; i+=1) {
-                  var d  = id.data;
+                  var d = id.data;
 
                   // r g b values for the color of the pixel
-                  d[0]   = ppmArray[j][i][0];
-                  d[1]   = ppmArray[j][i][1];
-                  d[2]   = ppmArray[j][i][2];
-                  d[3]   = 255;
+                  d[0] = ppmArray[j][i][0];
+                  d[1] = ppmArray[j][i][1];
+                  d[2] = ppmArray[j][i][2];
+                  d[3] = 255;
 
                   // draw the pixel
-                  ctx.putImageData( id, i, j );
+                  ctx.putImageData( id, !rotate ? i : j, !rotate ? j : i );
               }
             }
 
@@ -224,7 +233,78 @@
           var ctx = c.getContext('2d');
 
           ctx.clearRect(0, 0, this.configKonva.width, this.configKonva.height);
-      }
+      },
+
+      decompressImage(compressedPPMData) {
+          console.log("decompressing *.ppm image data ...");
+
+          this.convertedImage = "";
+
+          console.log("reading header information ...");
+          let ppmFileFormat;
+          let width;
+          let height;
+          let maxColor;
+          let combinedBits;
+          let uncompressedDataStream = "";
+
+          let line = "";
+          let index = 0;
+
+          for (var i = 0; i < compressedPPMData.length; i++) {
+              line += compressedPPMData[i];
+
+              if(compressedPPMData[i] === '\n' || (i === compressedPPMData.length - 1)) {
+                  switch (index) {
+                      case 0:
+                          ppmFileFormat = line;
+                          break;
+                      case 1:
+                          var splitLine = line.split(" ");
+                          width = parseInt(splitLine[0]);
+                          height = parseInt(splitLine[1]);
+
+                          combinedBits = gd(width, 30);
+                          break;
+                      case 2:
+                          maxColor = parseInt(line);
+                          break;
+                      case 3:
+                          /* blank line, time to print the header information */
+                          console.log("PPM format: " + ppmFileFormat);
+                          console.log("width: " + width);
+                          console.log("height: " + height);
+                          console.log("compression level (bits combined): " + combinedBits);
+                          console.log("max color code: " + maxColor + " -> changing to " + 255);
+
+                          maxColor = 255;
+
+                          console.log("Uncompressing ...");
+                          this.convertedImage = ppmFileFormat + "\n" + width + " " + height + "\n" + maxColor + "\n" + "\n";
+
+                          break;
+
+                      default:
+                          let uncompressedData = dec2Binary(line, combinedBits);
+                          uncompressedDataStream += uncompressedData;
+
+                          for (var j = 0; j < combinedBits; j++) {
+                            if ( uncompressedData[j] === '1' ) {
+                							  this.convertedImage += "255" + " " + "0" + " " + "0" + "\n";
+                						} else {
+                							  this.convertedImage += "0" + " " + "0" + " " + "0" + "\n";
+                						}
+                          }
+                  }
+
+                  line = "";
+                  index++;
+              }
+          }
+
+          console.log("Decompressed " + compressedPPMData.length + " to "
+                                      + uncompressedDataStream.length + " characters -> done.");
+      },
     },
 
     components: {
