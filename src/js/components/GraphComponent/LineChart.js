@@ -1,9 +1,11 @@
+/* https://www.chartjs.org/docs/latest/configuration/legend.html */
+
 import { Line, mixins } from "vue-chartjs";
 
 export default {
   extends: Line,
   mixins: [mixins.reactiveProp],
-  props: ["chartData"],
+  props: ["chartData", "xAxisLabel", "yAxisLabel"],
   data() {
     return {
       options: {
@@ -21,7 +23,7 @@ export default {
 
               scaleLabel: {
                 display: true,
-                labelString: 'value'
+                labelString: (typeof this.yAxisLabel === 'undefined' ? 'value' : this.yAxisLabel)
               }
             }
           ],
@@ -37,7 +39,7 @@ export default {
 
               scaleLabel: {
                 display: true,
-                labelString: 'ticks in seconds / s'
+                labelString: (typeof this.xAxisLabel === 'undefined' ? 'ticks in seconds / s' : this.xAxisLabel)
               }
             }
           ]
