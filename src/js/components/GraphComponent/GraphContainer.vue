@@ -297,7 +297,10 @@
       },
 
       onClearButtonClicked() {
+        this.ppmImageData = "clear";
+        this.$emit("data", this.ppmImageData);
 
+        this.ppmImageData = "";
       },
 
       onRebootButtonClicked() {

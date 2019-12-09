@@ -12,6 +12,7 @@
 /* https://medium.com/javascript-in-plain-english/avoid-mutating-a-prop-directly-7b127b9bca5b */
 /* https://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing */
 /* https://dev.to/alexmourer/sharing-data-between-components-invuejs-48me */
+/* https://www.w3schools.com/jsref/jsref_split.asp */
 
 <template>
     <div class="mandelbrot-viewer">
@@ -61,13 +62,16 @@
               /* clearing canvas */
               this.clearCanvas();
 
-              /* decompress image */
+              /* decompress image -> result will be stored in template prop! */
               this.decompressImage(this.ppmImageData);
 
               /* draw decompressed pixel *.ppm image */
               this.drawPPMImage(this.convertedImage, true);
-          } else {
+          }
 
+          if ( this.ppmImageData === "clear" ) {
+              /* clearing canvas */
+              this.clearCanvas();
           }
       }
     },
