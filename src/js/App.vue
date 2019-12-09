@@ -1,4 +1,5 @@
 /* https://material.io/design/color/#tools-for-picking-colors */
+/* https://github.com/JeffreyWay/laravel-mix/issues/790 */
 
 <template>
   <div id="app">
