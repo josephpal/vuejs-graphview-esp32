@@ -29,7 +29,7 @@ export default {
   header {
     height: $headerHeight;
     width: 100%;
-    background-color: $colorThemeBlue;
+    background-color: $colorThemeBlue7;
     padding: 0 20px;
     display: flex;
     justify-content: space-between;

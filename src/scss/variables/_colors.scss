@@ -1,19 +1,23 @@
-$colorDarkestBlue: #272d35;
-$colorDarkBlue: #363e49;
-$colorBlue: #4f5a69;
+/* material design color theme "Indigo 50" */
+$colorThemeBlue0: #E8EAF6; /* => Indigo 50 */
+$colorThemeBlue1: #C5CAE9; /* => 100 */
+$colorThemeBlue2: #9FA8DA; /* => 200 */
+$colorThemeBlue3: #7986CB; /* => 300 */
+$colorThemeBlue4: #5C6BC0; /* => 400 */
+$colorThemeBlue5: #3F51B5; /* => 500 */
+$colorThemeBlue6: #3949AB; /* => 600 */
 
-$colorThemeBlue: #303F9F;
+$colorThemeBlue7: #303F9F; /* => 700 */
 
+/* box shadow */
 $colorDarkestGrey: #222;
 $colorDarkGrey: #333;
 $colorMediumGrey: #888;
 
-$colorRed: #9f2925;
-$colorDarkRed: #bc2e2a;
-
+/* standard colors */
 $colorWhite: #fff;
 $colorBlack: #000;
 
+/* defaults */
 $headerHeight: 80px;
-
 $backgroundColor: #E3F2FD;
