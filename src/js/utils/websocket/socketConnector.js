@@ -1,5 +1,5 @@
-import SocketMessageTypes from './enum/SocketMessageTypes'
-import { browserType } from './utils/validationUtils'
+import SocketMessageTypes from './SocketMessageTypes'
+import { browserType } from './validationUtils'
 
 class SocketConnector {
   constructor() {
