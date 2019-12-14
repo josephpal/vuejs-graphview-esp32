@@ -1,16 +1,10 @@
 export default {
   // client messages
-  SEND: 'send',
-  START: 'start',
-  STOP: 'stop',
-  PAUSE: 'pause',
+  REBOOT: 'reboot',
   CONFIG: 'config',
 
   // server messages
-  STOPPED: 'stopped',
-  RUNNING: 'running',
-  PAUSED: 'paused',
-  READY: 'ready',
+  REBOOTING: 'rebooting',
   RECEIVED: 'received',
   ERROR: 'error',
 

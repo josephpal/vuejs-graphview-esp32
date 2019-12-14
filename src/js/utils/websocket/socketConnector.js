@@ -68,7 +68,7 @@ class SocketConnector {
 
       const onMessage = ({ data }) => {
           const type = data.split('/')[0];
-
+          
           if (type === responseType) {
               resolve(data);
               this.socket.removeEventListener('message', onMessage);
@@ -134,9 +134,9 @@ class SocketConnector {
 
       return this.send(SocketMessageTypes.PING, '', SocketMessageTypes.PONG)
         .then(() => {
-          console.log("Received: PONG");
+          // console.log("Received: PONG");
             if (this.pingPongTimeout) {
-              console.log("Clearing timeout ...");
+              // console.log("Clearing timeout ...");
               clearTimeout(this.pingPongTimeout);
             }
         })

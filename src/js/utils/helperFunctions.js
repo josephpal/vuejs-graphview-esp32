@@ -54,3 +54,7 @@ export const gd = (a, b) => {
 
 	return b;
 }
+
+export const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
