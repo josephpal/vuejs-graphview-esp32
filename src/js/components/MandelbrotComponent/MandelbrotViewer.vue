@@ -13,6 +13,8 @@
 /* https://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing */
 /* https://dev.to/alexmourer/sharing-data-between-components-invuejs-48me */
 /* https://www.w3schools.com/jsref/jsref_split.asp */
+/* https://stackoverflow.com/questions/17386707/how-to-check-if-a-canvas-is-blank */
+/* https://stackoverflow.com/questions/923885/capture-html-canvas-as-gif-jpg-png-pdf */
 
 <template>
     <div class="mandelbrot-viewer">
@@ -25,10 +27,15 @@
 </template>
 
 <script>
+  /* mandelbrot images examples (as jpeg with color gradient and a compressed version created with the esp32) */
   import mandelbrotImg from '../../../assets/pic/mandelbrot.jpeg';
   import { mandelbrot } from '../../utils/MandelbrotExample';
 
+  /* helper functions */
   import { dec2Binary, gd } from '../../utils/helperFunctions'
+
+  /* event bus for bidirectional communication between components */
+  import { EventBus } from '../../utils/eventbus/event-bus.js';
 
   export default {
     name: 'MandelbrotViewer',
@@ -41,6 +48,9 @@
         },
 
         convertedImage: null,
+
+        stage: null,
+        layer: null,
       };
     },
 
@@ -51,12 +61,16 @@
     },
 
     mounted() {
+      /* event bus callback listener */
+      EventBus.$on('getIMGData', this.returnIMGData);
+      EventBus.$on('clearCanvas', this.clearCanvas);
 
+      this.createKonvaLayer();
     },
 
     watch: {
       ppmImageData: function() {
-          if (this.ppmImageData !== "") {
+          if (this.ppmImageData.length !== 0) {
               console.log("receiving ppm image data in viewer component.");
 
               /* clearing canvas */
@@ -68,11 +82,6 @@
               /* draw decompressed pixel *.ppm image */
               this.drawPPMImage(this.convertedImage, true);
           }
-
-          if ( this.ppmImageData === "clear" ) {
-              /* clearing canvas */
-              this.clearCanvas();
-          }
       }
     },
 
@@ -81,18 +90,23 @@
     },
 
     methods: {
-      drawCircle() {
-        console.log("drawing circle ...");
-
+      createKonvaLayer() {
         // first we need to create a stage
-        var stage = new Konva.Stage({
+        this.stage = new Konva.Stage({
           container: 'container',   // id of container <div>
           width: this.configKonva.width,
           height: this.configKonva.height
         });
 
         // then create layer
-        var layer = new Konva.Layer();
+        this.layer = new Konva.Layer();
+
+        // add the layer to the stage
+        this.stage.add(this.layer);
+      },
+
+      drawCircle() {
+        console.log("drawing circle ...");
 
         // create our shape
         var circle = new Konva.Circle({
@@ -117,16 +131,6 @@
       drawImage() {
         console.log("drawing mandelbrot image ...");
 
-        // first we need to create a stage
-        var stage = new Konva.Stage({
-          container: 'container',   // id of container <div>
-          width: this.configKonva.width,
-          height: this.configKonva.height
-        });
-
-        // then create layer
-        var layer = new Konva.Layer();
-
         // main API:
         var imageObj = new Image();
         imageObj.onload = function() {
@@ -139,13 +143,13 @@
           });
 
           // add the shape to the layer
-          layer.add(img);
+          this.layer.add(img);
 
           // add the layer to the stage
-          stage.add(layer);
+          this.stage.add(layer);
 
           // draw the image
-          layer.batchDraw();
+          this.layer.batchDraw();
         };
 
         imageObj.src = mandelbrotImg;
@@ -155,21 +159,8 @@
       drawPPMImage(ppmImage, rotate) {
         console.log("drawing ppm pixel image...");
 
-        // first we need to create a stage
-        var stage = new Konva.Stage({
-          container: 'container',   // id of container <div>
-          width: this.configKonva.width,
-          height: this.configKonva.height
-        });
-
-        // then create layer
-        var layer = new Konva.Layer();
-
-        // add the layer to the stage
-        stage.add(layer);
-
         // get canvas context from konva layer
-        var c = layer.getCanvas()._canvas;
+        var c = this.layer.getCanvas()._canvas;
         var ctx = c.getContext('2d');
 
         // generate and 1x1 image data object (pixel), which will be drawn directly on canvas using
@@ -219,24 +210,15 @@
       clearCanvas() {
           console.log("clearing canvas.");
 
-          // first we need to create a stage
-          var stage = new Konva.Stage({
-            container: 'container',   // id of container <div>
-            width: this.configKonva.width,
-            height: this.configKonva.height
-          });
-
-          // then create layer
-          var layer = new Konva.Layer();
-
-          // add the layer to the stage
-          stage.add(layer);
-
           // get canvas context from konva layer
-          var c = layer.getCanvas()._canvas;
+          var c = this.layer.getCanvas()._canvas;
           var ctx = c.getContext('2d');
 
+          // clear pixels
           ctx.clearRect(0, 0, this.configKonva.width, this.configKonva.height);
+
+          // clear props
+          this.convertedImage = null;
       },
 
       decompressImage(compressedPPMData) {
@@ -308,6 +290,32 @@
 
           console.log("Decompressed " + compressedPPMData.length + " to "
                                       + uncompressedDataStream.length + " characters -> done.");
+      },
+
+      returnIMGData() {
+        // get canvas context from konva layer
+        var c = this.layer.getCanvas()._canvas;
+
+        if ( this.isCanvasBlank(c) === true ) {
+          console.error("canvas is empty. Nothing to save!");
+          EventBus.$emit('returnIMGData');
+        } else {
+          console.log("returning img data from canvas ...");
+
+          var imgCanvas = c;
+
+          EventBus.$emit('returnIMGData', imgCanvas);
+        }
+      },
+
+      isCanvasBlank(canvas) {
+        const context = canvas.getContext('2d');
+
+        const pixelBuffer = new Uint32Array(
+          context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+        );
+
+        return !pixelBuffer.some(color => color !== 0);
       },
     },
 

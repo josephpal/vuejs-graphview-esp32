@@ -1,3 +1,8 @@
+/* https://stuk.github.io/jszip/documentation/examples.html */
+/* https://stackoverflow.com/questions/28299050/how-to-use-filesaver-js-with-canvas/28305948 */
+/* https://www.npmjs.com/package/jszip */
+/*  */
+
 <template>
     <div class="graph-container">
         <div class="content">
@@ -10,24 +15,24 @@
                                     :showSpinner="showConnectBtnSpinner" />
                   <RectangleButton  class="save-button"
                                     icon="save"
-                                    :enabled="webSocketReady"
+                                    :enabled="webSocketReady && ppmImgDrawed"
                                     @click="onSaveButtonClicked"
-                                    :showSpinner="false" />
+                                    :showSpinner="showSaveBtnSpinner" />
                   <RectangleButton  class="load-button"
                                     icon="load"
                                     :enabled="webSocketReady"
-                                    @click="emitPPMData"
-                                    :showSpinner="false" />
+                                    @click="onLoadButtonClicked"
+                                    :showSpinner="showLoadBtnSpinner" />
                   <RectangleButton  class="clear-button"
                                     icon="clear"
                                     :enabled="webSocketReady"
                                     @click="onClearButtonClicked"
-                                    :showSpinner="false" />
+                                    :showSpinner="showClearBtnSpinner" />
                   <RectangleButton  class="reboot-button"
                                     icon="reload"
                                     :enabled="webSocketReady"
                                     @click="onRebootButtonClicked"
-                                    :showSpinner="false" />
+                                    :showSpinner="showRebootBtnSpinner" />
                 </div>
             </div>
 
@@ -90,6 +95,10 @@
   import SocketMessages from '../../utils/websocket/SocketMessageTypes';
   import socketConnector from '../../utils/websocket/socketConnector';
   import { validateIp, isEmpty } from '../../utils/websocket/validationUtils'
+  import { performRequest } from '../../utils/websocket/gateway'
+
+  /* event bus for bidirectional communication between components */
+  import { EventBus } from '../../utils/eventbus/event-bus.js';
 
   export default {
     name: 'GraphContainer',
@@ -114,6 +123,9 @@
 
         /* values */
         ppmImageData: "",
+        ppmImg: "",
+        ppmImgDrawed: false,
+        results: null,
 
         /* websocket */
         ip: "192.168.4.1",
@@ -138,24 +150,32 @@
       /* render line charts with default settings  */
       this.fillData();
 
-      /* test routine to add random data to the line charts every 500ms */
-      /*this.interval = setInterval(() => {
-          this.addData();
-      }, 500);*/
+      /* event bus callback listener -> will be called as an answer to EventBus.$emit('getIMGData') */
+      EventBus.$on('returnIMGData', this.downloadResults);
+
+      /* emulate websocket connection in development mode */
+      __DEV__ === true ? this.webSocketReady = true : this.webSocketReady = false;
     },
 
     methods: {
       /* line chart functions */
-      addData() {
+      dummyData() {
+        var data1 = [ " 42047", "21021", "21021", "15766", "16816", "14013", "15014", "13146", "" ];
+        var data2 = [ "29647", "15675", "20349", "15398", "11871", "13127", "12728", "11435", "" ];
+
+        this.displayReceivedChartData(data1, data2);
+      },
+
+      addData(data1, data2, data3, data4) {
         this.index = this.index + 1;
         this.labelArray.push(this.index);
 
-        this.dataArray1.push((Math.random() * 90) + 10);
-        this.dataArray2.push((Math.random() * 20) + 10);
-        this.dataArray3.push((Math.random() * 50) + 10);
-        this.dataArray4.push((Math.random() * 200) + 10);
+        this.dataArray1.push(data1);
+        this.dataArray2.push(data2);
+        this.dataArray3.push(data3);
+        this.dataArray4.push(data4);
 
-        if (this.index > 13) {
+        if (this.index > 16) {
           this.labelArray.shift();
 
           this.dataArray1.shift();
@@ -185,6 +205,7 @@
             {
               label: "speedup factor [Computation]",
               backgroundColor: "#41b883",
+              lineTension: 0,
               data: this.dataArray2
             }
           ]
@@ -207,12 +228,47 @@
             {
               label: "speedup factor [Mandelbrot]",
               backgroundColor: "#35495e",
+              lineTension: 0,
               data: this.dataArray4
             }
           ]
         };
       },
 
+      clearData() {
+        /* TODO clear arrays and reset line charts to default */
+      },
+
+      displayReceivedChartData(dataSerie1, dataSerie2) {
+        console.log("adding received data to charts ...");
+
+        this.results = "";
+
+        for(var i = 0; i < dataSerie1.length; i++) {
+          if( dataSerie1[i] !== "") {
+            this.results += dataSerie1[i] + ";"
+          }
+        }
+
+        this.results += "\n ";
+
+        for(var i = 0; i < dataSerie2.length; i++) {
+          if( dataSerie2[i] !== "") {
+            this.results += dataSerie2[i] + ";"
+          }
+        }
+
+        for(var i = 0; i < dataSerie1.length; i++) {
+          if( dataSerie1[i] !== "" && dataSerie2[i] !== "" ) {
+            setTimeout( function( data1, data2, data3, data4 ) {
+              this.addData( data1, data2, data3, data4 );
+            }.bind(this), 500 * (i+1), dataSerie1[i], dataSerie1[0] / dataSerie1[i],
+                          dataSerie2[i], dataSerie2[0] / dataSerie2[i]);
+          }
+        }
+
+        console.log("-> done.");
+      },
 
       /* websocket functions  */
       onSocketClose() {
@@ -224,16 +280,20 @@
       },
 
       onSocketMessage(message) {
-        //console.warn(message);
-        console.log(`Received message: ${message}`);
-        switch (message) {
-          case SocketMessages.RUNNING:
-            this.isReady = true;
-            this.isRunning = true;
-            this.isPaused = false;
+        /* message can consist of SocketMessages.Type / data; in case of a get request */
+        const type = message.split('/')[0];
+        const msgData = message.split('/')[1];
+
+        switch (type) {
+          case SocketMessages.REBOOTING:
+            /* process received results txt file */
+            console.log("server backend is rebooting now ...");
+
             break;
-          case SocketMessages.READY:
-            this.isReady = true;
+          case SocketMessages.RECEIVED:
+            /* process received results txt file */
+            console.log("backend received data / instruction.");
+
             break;
           case SocketMessages.ERROR:
             console.error('Server error');
@@ -284,27 +344,131 @@
       },
 
       onSaveButtonClicked() {
+        this.showSaveBtnSpinner = true;
 
+        /* request to the Viewer component to return the canvas image */
+        EventBus.$emit('getIMGData');
       },
 
-      emitPPMData() {
-        console.log("emit ppm data from graph container.");
+      downloadResults(imgCanvas) {
+        if( imgCanvas !== undefined) {
+          /* converting the canvas pixel matrix to a binary large object (blob) */
+          /* and generate a zip file containing the generated *ppm img as png and */
+          /* the data from the line charts as a *.txt file */
+          imgCanvas.toBlob( (blob) => (this.generateZipFile(blob)) );
 
-        this.ppmImageData = mandelbrot;
-        this.$emit("data", this.ppmImageData);
+        } else {
+          console.error("Can't saved img as file!");
+          this.showSaveBtnSpinner = false;
+        }
+      },
 
-        this.ppmImageData = "";
+      generateZipFile(imgBlob) {
+        /**
+         * Results in a zip containing
+         * results.txt
+         * images/
+         *    mandelbrot.png
+        **/
+
+        /* including jszip for creating a zip file */
+        var JSZip = require("jszip");
+        var zip = new JSZip();
+
+        /* add a *.txt file to the zip containing the chart results */
+        zip.file("results.txt", this.results);
+
+        /* add a folder images/ */
+        var img = zip.folder("images");
+
+        /* store the img from canvas into the created folder images/ */
+        img.file("mandelbrot.png", imgBlob, {base64: true});
+
+        /*  */
+        zip.generateAsync({type:"blob"}).then((content) => {
+            /* filename generation: prefix + filename => YYYY-MM-DD - FLENAME.zip */
+            let prefix = new Date().getFullYear() + "-"
+                          + new Date().getMonth() + "-" + new Date().getDay() + " - ";
+
+            /* using FileSaver.js to save the zip file to the user */
+            saveAs(content, prefix + "evaluation.zip");
+
+            this.showSaveBtnSpinner = false;
+        }).catch(() => {
+            console.error("zip file couldn't be created. Internal error!");
+
+            this.showSaveBtnSpinner = false;
+        });
+      },
+
+      onLoadButtonClicked() {
+        this.showLoadBtnSpinner = true;
+
+        if ( __DEV__ !== true ) {
+          console.log("emit ppm data from graph container.");
+
+          performRequest('GET', 'mandelbrot.ppm', null).then( (slug) => {
+            this.ppmImageData = slug;
+            this.$emit("data", this.ppmImageData);
+
+            this.ppmImageData = "";
+            this.ppmImgDrawed = true;
+
+            performRequest('GET', 'results.txt', null).then( (slug) => {
+              let resultsComputation = slug.split('\n')[0];
+              let resultsMandelbrot = slug.split('\n')[1];
+
+              let resultsComputationValues = resultsComputation.split(';');
+              let resultsMandelbrotValues = resultsMandelbrot.split(';');
+
+              console.log("received execution time arrays:");
+
+              console.log(resultsComputationValues);
+              console.log(resultsMandelbrotValues);
+
+              this.displayReceivedChartData(resultsComputationValues, resultsMandelbrotValues);
+
+              this.showLoadBtnSpinner = false;
+            }).catch( () => {
+              console.error("error while receiving *.txt file.");
+
+              this.showLoadBtnSpinner = false;
+            });
+          }).catch( () => {
+            console.error("error while receiving *.ppm image.");
+
+            this.showLoadBtnSpinner = false;
+          });
+
+        } else {
+          console.warn("running on development mode. Passing a local stored compressed file as a *.ppm image and a local result.txt file!");
+          this.ppmImageData = mandelbrot;
+          this.$emit("data", this.ppmImageData);
+
+          this.ppmImageData = "";
+          this.ppmImgDrawed = true;
+
+          this.dummyData();
+
+          this.showLoadBtnSpinner = false;
+        }
       },
 
       onClearButtonClicked() {
-        this.ppmImageData = "clear";
-        this.$emit("data", this.ppmImageData);
+        this.showClearBtnSpinner = true;
 
-        this.ppmImageData = "";
+        this.ppmImgDrawed = false;
+        EventBus.$emit('clearCanvas');
+
+        this.showClearBtnSpinner = false;
       },
 
       onRebootButtonClicked() {
+        this.showRebootBtnSpinner = true;
 
+        /* TODO: send reboot to websocket server -> UI will shut down message?! */
+
+        this.showRebootBtnSpinner = false;
       },
     },
 

@@ -44,9 +44,11 @@ export default {
             }
           ]
         },
+
         legend: {
           display: true
         },
+
         responsive: true,
         maintainAspectRatio: false
       }
