@@ -160,7 +160,7 @@
     methods: {
       /* line chart functions */
       dummyData() {
-        var data1 = [ " 42047", "21021", "21021", "15766", "16816", "14013", "15014", "13146", "" ];
+        var data1 = [ "42047", "21021", "21021", "15766", "16816", "14013", "15014", "13146", "" ];
         var data2 = [ "29647", "15675", "20349", "15398", "11871", "13127", "12728", "11435", "" ];
 
         this.displayReceivedChartData(data1, data2);
@@ -236,27 +236,31 @@
       },
 
       clearData() {
-        /* TODO clear arrays and reset line charts to default */
+        this.labelArray = [0];
+        
+        this.dataArray1 = [0];
+        this.dataArray2 = [0];
+        this.dataArray3 = [0];
+        this.dataArray4 = [0];
+
+        this.index = 0;
+
+        this.datacollection1 = null;
+        this.datacollection2 = null;
+        this.datacollection3 = null;
+        this.datacollection4 = null;
+
+        this.fillData();
       },
 
       displayReceivedChartData(dataSerie1, dataSerie2) {
         console.log("adding received data to charts ...");
 
-        this.results = "";
+        this.results = "----------------------------------------------------------------- benchmark Computation ----------------------------------------------------------------\n";
+        this.results += this.generateResultTable(dataSerie1);
 
-        for(var i = 0; i < dataSerie1.length; i++) {
-          if( dataSerie1[i] !== "") {
-            this.results += dataSerie1[i] + ";"
-          }
-        }
-
-        this.results += "\n ";
-
-        for(var i = 0; i < dataSerie2.length; i++) {
-          if( dataSerie2[i] !== "") {
-            this.results += dataSerie2[i] + ";"
-          }
-        }
+        this.results += "----------------------------------------------------------------- benchmark Mandelbrot -----------------------------------------------------------------\n";
+        this.results += this.generateResultTable(dataSerie2);
 
         for(var i = 0; i < dataSerie1.length; i++) {
           if( dataSerie1[i] !== "" && dataSerie2[i] !== "" ) {
@@ -268,6 +272,35 @@
         }
 
         console.log("-> done.");
+      },
+
+      generateResultTable(dataSerie) {
+        let numOfThreads = "number of threads:\t[\t";
+        let executionTime = "execution time:\t\t[\t";
+        let speedup = "total speedup:\t\t[\t";
+        let coreNumber = "core number:\t\t[\t";
+
+        for(var i = 0; i < dataSerie.length; i++) {
+          if( dataSerie[i] !== "") {
+            numOfThreads += Math.floor(i+1) + "\t\t";
+            executionTime += dataSerie[i];
+            speedup += (dataSerie[0] / dataSerie[i]).toFixed(2) + "\t";
+            coreNumber += Math.floor((i+2)%2) + "\t\t";
+
+            if( dataSerie[i].length < 3 ) {
+      				executionTime +="\t";
+      			} else {
+      				executionTime +="\t";
+      			}
+          }
+        }
+
+        numOfThreads += "]\n";
+        executionTime += "]\n"
+        speedup += "]\n";
+        coreNumber += "]\n";
+
+        return numOfThreads + executionTime + speedup + coreNumber + "\n";
       },
 
       /* websocket functions  */
@@ -387,8 +420,8 @@
         /*  */
         zip.generateAsync({type:"blob"}).then((content) => {
             /* filename generation: prefix + filename => YYYY-MM-DD - FLENAME.zip */
-            let prefix = new Date().getFullYear() + "-"
-                          + new Date().getMonth() + "-" + new Date().getDay() + " - ";
+            let prefix = (new Date()).getFullYear() + "-"
+                          + ( (new Date()).getMonth() + 1) + "-" + (new Date()).getDate() + " - ";
 
             /* using FileSaver.js to save the zip file to the user */
             saveAs(content, prefix + "evaluation.zip");
@@ -459,6 +492,8 @@
 
         this.ppmImgDrawed = false;
         EventBus.$emit('clearCanvas');
+
+        this.clearData();
 
         this.showClearBtnSpinner = false;
       },
